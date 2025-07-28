@@ -1,0 +1,43 @@
+pi.thingspeak.com";
+String apiKey = J2OPHM1CL3V297Q1;  // Replace with your API key
+unsigned long channelID = 2987639;  // Replace with your Channel ID
+#include <ESP8266WiFi.h>  // For ESP8266
+// #include <WiFi.h>      // For ESP32
+
+const char* ssid = "YOUR_WIFI_SSID";
+const char* password = "YOUR_WIFI_PASSWORD";
+
+// ThingSpeak Settings
+const char* server = "a
+void setup() {
+  Serial.begin(115200);
+  WiFi.begin(ssid, password);
+  
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("\nWiFi Connected!");
+}
+
+void loop() {
+  if (WiFi.status() == WL_CONNECTED) {
+    float sensorValue = analogRead(A0);  // Replace with your sensor reading
+    
+    WiFiClient client;
+    HTTPClient http;
+    
+    String url = "http://" + String(server) + "/update?api_key=" + apiKey + "&field1=" + String(sensorValue);
+    
+    http.begin(client, url);
+    int httpCode = http.GET();
+    
+    if (httpCode == HTTP_CODE_OK) {
+      Serial.println("Data sent to ThingSpeak!");
+    } else {
+      Serial.println("Error sending data.");
+    }
+    http.end();
+  }
+  delay(15000);  // Wait 15 seconds (ThingSpeak requires ~15s between updates)
+}

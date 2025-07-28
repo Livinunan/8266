@@ -1,0 +1,58 @@
+#include <ESP8266WiFi.h>
+#include <ESP8266HTTPClient.h>
+
+// WiFi credentials
+const char* ssid = "Galaxy F23 5G8977";
+const char* password = "izqh8000";
+
+// ThingSpeak settings
+const char* server = "api.thingspeak.com";
+String apiKey = "J2OPHM1CL3V297Q1"; // Replace with your API key
+unsigned long channelID = 2987639; // Replace with your Channel ID
+
+void setup() {
+  Serial.begin(115200);
+  delay(10);
+
+  // Connect to WiFi
+  WiFi.begin(ssid, password);
+  Serial.print("Connecting to WiFi...");
+  
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  
+  Serial.println("\nWiFi connected!");
+  Serial.print("IP Address: ");
+  Serial.println(WiFi.localIP());
+}
+
+void loop() {
+  if (WiFi.status() == WL_CONNECTED) {
+    WiFiClient client;
+    HTTPClient http;
+    
+    // Construct the URL with data
+    String url = "http://" + String(server) + "/update?api_key=" + apiKey;
+    url += "&field1=" + String(random(100)); // Example: Sending random data (0-99)
+    // Add more fields if needed: &field2=XX, &field3=YY, etc.
+
+    Serial.println("Sending data to ThingSpeak...");
+    
+    http.begin(client, url); // Start HTTP connection
+    int httpCode = http.GET(); // Send GET request
+
+    if (httpCode == 200) {
+      Serial.println("Data sent successfully!");
+    } else {
+      Serial.println("Error sending data. HTTP Code: " + String(httpCode));
+    }
+    
+    http.end(); // Close connection
+  } else {
+    Serial.println("WiFi disconnected. Reconnecting...");
+    WiFi.begin(ssid, password);
+  }
+
+  delay(15000); // 
